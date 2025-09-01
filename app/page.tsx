@@ -156,8 +156,8 @@ export default function EmailManager() {
           subject: emailSubject,
           htmlContent: finalContent,
          sender: {
-            name: "Richard pencersales1",  // Replace with actual sender name
-            email: "Richard_pencersales1@gmail.com"
+            name: "Lawnerchris",  // Replace with actual sender name
+            email: "Lawnerchris@gmail.com"
           }
         }),
       });
