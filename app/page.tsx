@@ -156,7 +156,7 @@ export default function EmailManager() {
           subject: emailSubject,
           htmlContent: finalContent,
          sender: {
-            name: "Lawnerchris",  // Replace with actual sender name
+            name: "Mark Tillburg",  // Replace with actual sender name
             email: "Lawnerchris@gmail.com"
           }
         }),
