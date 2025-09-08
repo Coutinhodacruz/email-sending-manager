@@ -156,8 +156,8 @@ export default function EmailManager() {
           subject: emailSubject,
           htmlContent: finalContent,
          sender: {
-            name: "Mark Tillburg",  // Replace with actual sender name
-            email: "Lawnerchris@gmail.com"
+            name: "Luis",
+            email: process.env.SMTP_USER|| "luis@serviceconect.com"
           }
         }),
       });
@@ -241,7 +241,7 @@ export default function EmailManager() {
 
             {/* NEW: Bulk Paste */}
             <div className="space-y-2">
-              <label htmlFor="bulk-emails" className="text-sm font-medium">
+              <label htmlFor="bulk-emails" className="text-sm font-medium text-amber-500">
                 Bulk paste (comma, space, or new line)
               </label>
               <textarea
@@ -300,7 +300,7 @@ john@example.com, team@company.com more@company.com`}
 
             {/* Email Subject */}
             <div className="space-y-2">
-              <label htmlFor="email-subject" className="text-sm font-medium">
+              <label htmlFor="email-subject" className="text-sm font-medium text-amber-500">
                 Subject
               </label>
               <Input
@@ -464,7 +464,7 @@ john@example.com, team@company.com more@company.com`}
             >
               {isLoading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  <div className="animate-spin bg-amber-500 rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                   Sending...
                 </>
               ) : (
