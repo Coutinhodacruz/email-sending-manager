@@ -156,7 +156,7 @@ export default function EmailManager() {
           subject: emailSubject,
           htmlContent: finalContent,
          sender: {
-            name: "Luis",
+            name: "Admin",
             email: process.env.SMTP_USER|| "luis@serviceconect.com"
           }
         }),
