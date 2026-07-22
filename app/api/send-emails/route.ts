@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 import type { TransportOptions as SMTPTransportOptions } from 'nodemailer'
 
-export const runtime = 'nodejs' 
+export const runtime = 'nodejs'
 
 type EmailPayload = {
   emails: string[]
@@ -38,17 +38,17 @@ export async function POST(request: Request) {
   if (!sender?.email || !sender?.name) return NextResponse.json({ success: false, message: 'Sender information is required' }, { status: 400 })
 
 
-  const AUTH_USER = process.env.SMTP_USER || process.env.SMTP_USER
-  const AUTH_PASS = process.env.SMTP_PASS || process.env.SMTP_PASS
+  const AUTH_USER = process.env.SMTP_LOGIN || process.env.SMTP_USER
+  const AUTH_PASS = process.env.SMTP_PASSWORD || process.env.SMTP_PASS
   if (!AUTH_USER || !AUTH_PASS) {
-    return NextResponse.json({ success: false, message: 'SMTP not configured (EMAIL_USER/EMAIL_PASS missing)' }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'SMTP not configured (SMTP_LOGIN/SMTP_PASSWORD missing)' }, { status: 500 })
   }
 
-  const HOST = process.env.SMTP_HOST || 'mail.privateemail.com'
-  const PORT = Number(process.env.SMTP_PORT || 465)
+  const HOST = process.env.SMTP_SERVER || process.env.SMTP_HOST || 'smtp-relay.brevo.com'
+  const PORT = Number(process.env.SMTP_PORT || 587)
   const SECURE = PORT === 465
 
-  console.log('SMTP host:', process.env.SMTP_HOST, 'port:', process.env.SMTP_PORT, 'user:', process.env.SMTP_USER?.toLowerCase());
+  console.log('SMTP host:', HOST, 'port:', PORT, 'user:', AUTH_USER?.toLowerCase());
   console.log('From:', `"${sender.name}" <${sender.email}>`)
 
 
@@ -90,9 +90,9 @@ export async function POST(request: Request) {
     console.error('SMTP verification failed:', errorMessage)
     console.error('Error details:', e)
     return NextResponse.json(
-      { 
-        success: false, 
-        message: 'SMTP verification failed', 
+      {
+        success: false,
+        message: 'SMTP verification failed',
         error: errorMessage,
         details: {
           host: HOST,
@@ -155,7 +155,7 @@ export async function POST(request: Request) {
 
     const withMarkdownLinks = trimmed.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, text, url) => {
       let u: URL | null = null
-      try { u = new URL(url); if (!u.hash) u.hash = email } catch {}
+      try { u = new URL(url); if (!u.hash) u.hash = email } catch { }
       if (String(text).startsWith('!btn!')) {
         const btn = String(text).replace('!btn!', '').trim()
         return `<div style="text-align:center;margin:20px 0;"><a href="${(u ?? new URL(url, 'https://dummy.invalid')).toString()}" target="_blank" class="button">${btn}</a></div>`
@@ -177,7 +177,7 @@ export async function POST(request: Request) {
     })
 
     const ctaPhrases = ['view more', 'learn more', 'see more']
-    const ctaPattern = new RegExp(`(^|\\n)\\s*(?:${ctaPhrases.map(p => p.replace(/ /g, '\\s*')).join('|')})\\s*(?=\\n|$)`,'gi')
+    const ctaPattern = new RegExp(`(^|\\n)\\s*(?:${ctaPhrases.map(p => p.replace(/ /g, '\\s*')).join('|')})\\s*(?=\\n|$)`, 'gi')
 
     const withViewMoreBtn = withPlainLinks.replace(ctaPattern, (match, prefix) => {
       if (!firstUrl) return match
@@ -277,9 +277,9 @@ export async function POST(request: Request) {
   }
 
   // Ensure FROM generally matches the authenticated mailbox for best deliverability
-   // Use authenticated mailbox in visible From to avoid spam/JFE040011
+  // Use authenticated mailbox in visible From to avoid spam/JFE040011
   const displayName = sender.name || 'ServiceConect'
-  const fromHeader = `"${displayName}" <${AUTH_USER}>`
+  const fromHeader = `"${displayName}" <${sender.email}>`
 
   type Result =
     | { email: string; status: 'success'; responseId?: string }
@@ -294,7 +294,7 @@ export async function POST(request: Request) {
         const text = toPlainText(personalized)
         const domain = sender.email.split('@')[1] || 'yourdomain.com'
         const messageId = `<${Date.now()}.${Math.random().toString(36).substring(2)}@${domain}>`
-        
+
         console.log(`Sending email to: ${rcpt}`)
         const mailOptions = {
           from: fromHeader,
@@ -315,9 +315,9 @@ export async function POST(request: Request) {
             'X-Report-Abuse': `Please report abuse by forwarding this email to abuse@${domain}`
           },
           // Envelope must match your authenticated domain
-          envelope: { 
-            from: AUTH_USER, 
-            to: rcpt 
+          envelope: {
+            from: sender.email,
+            to: rcpt
           },
           // DKIM signing would be handled by your SMTP server or you can add it here
           dkim: process.env.DKIM_PRIVATE_KEY ? {
@@ -326,7 +326,7 @@ export async function POST(request: Request) {
             privateKey: process.env.DKIM_PRIVATE_KEY
           } : undefined
         }
-        
+
         console.log(`Mail options prepared for ${rcpt}`, {
           from: fromHeader,
           to: rcpt,
@@ -335,7 +335,7 @@ export async function POST(request: Request) {
           htmlLength: html?.length,
           hasDkim: !!process.env.DKIM_PRIVATE_KEY
         })
-        
+
         const info = await transporter.sendMail(mailOptions)
         console.log(`Email sent to ${rcpt}:`, info.response)
         return { email: rcpt, status: 'success', responseId: info.messageId }
@@ -351,9 +351,9 @@ export async function POST(request: Request) {
         const errorMessage = err?.message || 'Unknown SMTP error'
         console.error(`Failed to send email to ${rcpt}:`, errorMessage)
         console.error('Error details:', err)
-        return { 
-          email: rcpt, 
-          status: 'failed', 
+        return {
+          email: rcpt,
+          status: 'failed',
           error: errorMessage,
           code: err?.code,
           response: err?.response,
