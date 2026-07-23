@@ -155,9 +155,9 @@ export default function EmailManager() {
           emails: emailList,
           subject: emailSubject,
           htmlContent: finalContent,
-          sender: {
+           sender: {
             name: "no-responder",
-            email: process.env.SMTP_USER|| "no-responder@balusigadgets.org"
+            email: "dacruzcoutinho10@gmail.com"
           }
         }),
       });
