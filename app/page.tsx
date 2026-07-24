@@ -437,13 +437,16 @@ john@example.com, team@company.com more@company.com`}
                         const cursorPos = textareaRef.current?.selectionStart || 0;
                         const before = emailContent.substring(0, cursorPos);
                         const after = emailContent.substring(cursorPos);
-                        const newContent = `${before}<a href="${url}" style="color: #2563eb; text-decoration: underline;">${text}</a>${after}`;
+                        
+                        const buttonHtml = `<div style="text-align: center; margin: 20px 0;"><a href="${url}" style="background-color: #0070f3; color: #ffffff !important; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px; font-family: Arial, sans-serif;" target="_blank">${text}</a></div>`;
+
+                        const newContent = `${before}${buttonHtml}${after}`;
                         setEmailContent(newContent);
 
-                        // Set cursor position after the inserted link
+                        // Set cursor position after the inserted button
                         setTimeout(() => {
                           if (textareaRef.current) {
-                            const newCursorPos = cursorPos + text.length + 15 + url.length;
+                            const newCursorPos = cursorPos + buttonHtml.length;
                             textareaRef.current.focus();
                             textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
                           }

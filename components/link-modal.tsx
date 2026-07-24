@@ -10,15 +10,14 @@ export function LinkModal({ onInsert }: { onInsert: (text: string, url: string) 
   const [open, setOpen] = useState(false)
   const [linkText, setLinkText] = useState("")
   const [linkUrl, setLinkUrl] = useState("")
+
   const isFormValid = linkText.trim() !== "" && linkUrl.trim() !== ""
 
   // If no scheme is present, default to https://
   const normalizeUrl = (url: string) => {
     const trimmed = url.trim()
     if (!trimmed) return trimmed
-    // If it already has a scheme like http:, https:, mailto:, etc., keep as-is
     if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) return trimmed
-    // Protocol-relative URLs like //example.com -> keep as-is (rare in emails but supported)
     if (trimmed.startsWith("//")) return trimmed
     return `https://${trimmed}`
   }
@@ -36,7 +35,7 @@ export function LinkModal({ onInsert }: { onInsert: (text: string, url: string) 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="icon">
+        <Button type="button" variant="outline" size="icon" title="Insert Link">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -54,7 +53,7 @@ export function LinkModal({ onInsert }: { onInsert: (text: string, url: string) 
           <span className="sr-only">Insert Link</span>
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Insert Link</DialogTitle>
         </DialogHeader>
@@ -69,6 +68,7 @@ export function LinkModal({ onInsert }: { onInsert: (text: string, url: string) 
               required
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="link-url">Link URL</Label>
             <Input
@@ -79,8 +79,8 @@ export function LinkModal({ onInsert }: { onInsert: (text: string, url: string) 
               placeholder="example.com or https://example.com"
               required
             />
-            {/* <p className="text-xs text-muted-foreground">Must start with http:// or https://</p> */}
           </div>
+
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
